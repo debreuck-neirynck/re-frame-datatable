@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## [0.6.1] - 2018-07-06
+### Added
+- Added support for dragging & dropping table rows
+
 ## [0.6.0] - 2017-09-09
 ### Breaking
 - Moved default-pagination-controls view component to new namespace: re-frame-datatable.views
