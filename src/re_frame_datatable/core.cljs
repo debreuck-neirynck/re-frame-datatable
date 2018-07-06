@@ -50,6 +50,14 @@
 (s/def ::footer-component fn?)
 (s/def ::header-enabled? ::enabled?)
 
+(s/def ::draggable? ::enabled?)
+(s/def ::draggable-fn fn?)
+(s/def ::drag-fn fn?)
+(s/def ::drop-fn fn?)
+(s/def ::drag-over-fn fn?)
+(s/def ::drag-drop
+  (s/keys :opt [::draggable? ::draggable-fn ::drag-fn ::drop-fn ::drag-over-fn]))
+
 (s/def ::options
   (s/nilable
     (s/keys :opt [::pagination
@@ -57,7 +65,8 @@
                   ::table-classes
                   ::selection
                   ::extra-header-row-component
-                  ::footer-component])))
+                  ::footer-component
+                  ::drag-drop])))
 
 
 ; --- Re-frame database paths ---
@@ -303,6 +312,21 @@
 ; --- Views ---
 ; ----------------------------------------------------------------------------------------------------------------------
 
+(defn- drag-drop-attrs
+  "Generates the attributes according to the drag-drop configuration.  If the configuration
+   is empty, this just returns an empty map.  The `-fn` arguments are functions that should 
+   accept the row as argument.  All but the `draggable-fn` functions should return a new
+   handler function.  The `draggable-fn` should return a boolean value, to indicate whether
+   the row is draggable or not (this supersedes the `draggable?` option)."
+  [{:keys [::draggable? ::draggable-fn ::drag-fn ::drop-fn ::drag-over-fn]} row]
+  (cond-> {}
+    ;; TODO Allow dropping something on the table itself, in addition to dropping on specific rows
+    draggable? (assoc :draggable true)
+    draggable-fn (assoc :draggable (draggable-fn row))
+    drag-fn (assoc :on-drag-start (drag-fn row))
+    drop-fn (assoc :on-drop (drop-fn row))
+    drag-over-fn (assoc :on-drag-over (drag-over-fn row))))
+
 (defn datatable [db-id data-sub columns-def & [options]]
   {:pre [(or (s/valid? ::db-id db-id)
              (js/console.error (s/explain-str ::db-id db-id)))
@@ -341,7 +365,8 @@
                        ::header-enabled?
                        ::extra-header-row-component
                        ::footer-component
-                       ::empty-tbody-component]} options]
+                       ::empty-tbody-component
+                       ::drag-drop]} options]
 
            [:table.re-frame-datatable
             (when table-classes
@@ -405,7 +430,9 @@
                     (merge
                       {}
                       (when tr-class-fn
-                        (css-class-str (tr-class-fn data-entry))))
+                        (css-class-str (tr-class-fn data-entry)))
+                      ;; Add the attributes for drag/drop operations, if any
+                      (drag-drop-attrs drag-drop data-entry))
 
                     (when (::enabled? selection)
                       [:td
