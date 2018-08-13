@@ -441,11 +441,14 @@
                                 :on-change #(re-frame/dispatch [::change-row-selection db-id i (-> % .-target .-checked)])}]])
 
                     (doall
-                      (for [{:keys [::column-key ::render-fn ::td-class-fn]} columns-def]
+                      (for [{:keys [::column-key ::render-fn ::td-class-fn ::td-attr-fn]} columns-def]
                         ^{:key (str i \- column-key)}
                         [:td
                          (merge
                            {}
+                           ;; If given, apply any custom attributes
+                           (when td-attr-fn
+                             (td-attr-fn (get-in data-entry column-key) data-entry))
                            (when td-class-fn
                              (css-class-str (td-class-fn (get-in data-entry column-key) data-entry))))
 
