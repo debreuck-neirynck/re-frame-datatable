@@ -2,8 +2,6 @@
   (:require [re-frame.core :as re-frame]
             [re-frame-datatable.core :as dt]))
 
-
-
 (defn default-pagination-controls [db-id data-sub]
   (let [pagination-state (re-frame/subscribe [::dt/pagination-state db-id data-sub])]
     (fn []

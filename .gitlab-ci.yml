@@ -21,12 +21,12 @@ clj:test:
 clj:deploy:
   stage: publish
   script:
-    - lein deploy clojars
+    - lein deploy dn-clojars
   dependencies:
     - clj:test
   rules:
-    # Deploy if the branch is develop or a release branch
-    - if: '$CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^release/'
+    # Deploy if the branch is master or a release branch
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH =~ /^release/'
       when: on_success
 
 stages:

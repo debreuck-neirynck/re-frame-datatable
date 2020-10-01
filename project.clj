@@ -10,4 +10,8 @@
   :profiles {:dev
              {:dependencies [[midje "1.9.9"]
                              [dn/midje-junit-formatter "0.1.1"]]
-              :plugins [[lein-midje "3.2.1"]]}})
+              :plugins [[lein-midje "3.2.1"]]}}
+  :deploy-repositories
+  [["dn-clojars" {:url "https://clojars.org/repo"
+                  :username [:gpg :env/clojars_user]
+                  :password [:gpg :env/clojars_pass]}]])
