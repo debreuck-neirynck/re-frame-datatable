@@ -356,7 +356,7 @@
        #(re-frame/dispatch [::on-will-unmount db-id])
 
 
-       :component-function
+       :reagent-render
        (fn [db-id data-sub columns-def & [options]]
          (let [{:keys [::visible-items ::state]} @view-data
                {:keys [::selection]} state
