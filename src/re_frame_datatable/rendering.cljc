@@ -124,31 +124,19 @@
          (get-in data-entry column-key))]))]))
 
 (defn- body [visible-items state db-id columns-def options]
-  (let [{:keys [:selection]} state
-        {:keys [:re-frame-datatable.core/table-classes
-                :re-frame-datatable.core/tr-class-fn
-                :re-frame-datatable.core/footer-component
-                :re-frame-datatable.core/empty-tbody-component
-                :re-frame-datatable.core/drag-drop]} options]
-
-    (if (empty? visible-items)
-       [:tbody [empty-table columns-def state options]]
-       ;; Non-empty table
-       (->> visible-items
-            (map (partial table-row db-id columns-def state options))
-            (into [:tbody])))))
+  (if (empty? visible-items)
+    [:tbody [empty-table columns-def state options]]
+    ;; Non-empty table
+    (->> visible-items
+         (map (partial table-row db-id columns-def state options))
+         (into [:tbody]))))
 
 (defn render-table [db-id data-sub columns-def options]
   (let [view-data (re-frame/subscribe [::subs/data db-id data-sub])
         {:keys [:visible-items :state]} @view-data
-        {:keys [:selection]} state
         {:keys [:re-frame-datatable.core/table-classes
-                :re-frame-datatable.core/tr-class-fn
                 :re-frame-datatable.core/header-enabled?
-                :re-frame-datatable.core/extra-header-row-component
-                :re-frame-datatable.core/footer-component
-                :re-frame-datatable.core/empty-tbody-component
-                :re-frame-datatable.core/drag-drop]} options]
+                :re-frame-datatable.core/footer-component]} options]
 
     [:table.re-frame-datatable
      (when table-classes
