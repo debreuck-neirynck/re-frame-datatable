@@ -24,105 +24,136 @@
     drop-fn (assoc :on-drop (drop-fn row))
     drag-over-fn (assoc :on-drag-over (drag-over-fn row))))
 
-(defn render-table [db-id data-sub columns-def & [options]]
+(defn- header [visible-items state db-id columns-def options]
+  (let [{:keys [:selection]} state
+        {:keys [:re-frame-datatable.core/extra-header-row-component]} options]
+    [:thead
+     (when extra-header-row-component
+       [extra-header-row-component])
+
+     [:tr
+      (when (::enabled? selection)
+        [:th {:style {:max-width "16em"}}
+         [:input {:type      "checkbox"
+                  :checked   (clojure.set/subset?
+                              (->> visible-items (map first) (set))
+                              (:selected-indexes selection))
+                  :on-change #(when-not (zero? (count visible-items))
+                                (re-frame/dispatch [::change-table-selection
+                                                    db-id
+                                                    (->> visible-items (map first) (set))
+                                                    (-> % .-target .-checked)]))}]
+         [:br]
+         [:small (str (count (:selected-indexes selection)) " selected")]])
+
+      (doall
+       (for [{:keys [:re-frame-datatable.core/column-key
+                     :re-frame-datatable.core/column-label
+                     :re-frame-datatable.core/sorting]} columns-def]
+         ^{:key (str column-key)}
+         [:th
+          (merge
+           (when (::enabled? sorting)
+             {:style    {:cursor "pointer"}
+              :on-click #(re-frame/dispatch [::sorting/set-sort-key db-id column-key (::comp-fn sorting)])
+              :class    "sorted-by"})
+           (when (= column-key (get-in state [::sort ::sort-key]))
+             (css-class-str ["sorted-by"
+                             (condp = (get-in state [::sort ::sort-comp])
+                               ::sort-asc "asc"
+                               ::sort-desc "desc"
+                               "")])))
+          (cond
+            (string? column-label) column-label
+            (fn? column-label) [column-label]
+            :else "")]))]]))
+
+(defn- empty-table [columns-def state options]
+  (let [{:keys [:selection]} state
+        {:keys [:re-frame-datatable.core/empty-tbody-component]} options]
+    [:tr
+     [:td {:col-span (+ (count columns-def)
+                        (if (::enabled? selection) 1 0))
+           :style    {:text-align "center"}}
+      (if empty-tbody-component
+        [empty-tbody-component]
+        "no items")]]))
+
+(defn- table-row [db-id columns-def state options [i data-entry]]
+  (let [{:keys [:selection]} state
+        {:keys [:re-frame-datatable.core/table-classes
+                :re-frame-datatable.core/tr-class-fn
+                :re-frame-datatable.core/footer-component
+                :re-frame-datatable.core/empty-tbody-component
+                :re-frame-datatable.core/drag-drop]} options]
+  [:tr
+   (merge
+    {}
+    (when tr-class-fn
+      (css-class-str (tr-class-fn data-entry)))
+    ;; Add the attributes for drag/drop operations, if any
+    (drag-drop-attrs drag-drop data-entry))
+
+   (when (::enabled? selection)
+     [:td
+      [:input {:type      "checkbox"
+               :checked   (contains? (::selected-indexes selection) i)
+               :on-change #(re-frame/dispatch [::change-row-selection db-id i (-> % .-target .-checked)])}]])
+
+   (doall
+    (for [{:keys [:re-frame-datatable.core/column-key
+                  :re-frame-datatable.core/render-fn
+                  :re-frame-datatable.core/td-class-fn
+                  :re-frame-datatable.core/td-attr-fn]} columns-def]
+      ^{:key (str i \- column-key)}
+      [:td
+       (merge
+        {}
+        ;; If given, apply any custom attributes
+        (when td-attr-fn
+          (td-attr-fn (get-in data-entry column-key) data-entry))
+        (when td-class-fn
+          (css-class-str (td-class-fn (get-in data-entry column-key) data-entry))))
+
+       (if render-fn
+         [render-fn (get-in data-entry column-key) data-entry]
+         (get-in data-entry column-key))]))]))
+
+(defn- body [visible-items state db-id columns-def options]
+  (let [{:keys [:selection]} state
+        {:keys [:re-frame-datatable.core/table-classes
+                :re-frame-datatable.core/tr-class-fn
+                :re-frame-datatable.core/footer-component
+                :re-frame-datatable.core/empty-tbody-component
+                :re-frame-datatable.core/drag-drop]} options]
+
+    (if (empty? visible-items)
+       [:tbody [empty-table columns-def state options]]
+       ;; Non-empty table
+       (->> visible-items
+            (map (partial table-row db-id columns-def state options))
+            (into [:tbody])))))
+
+(defn render-table [db-id data-sub columns-def options]
   (let [view-data (re-frame/subscribe [::subs/data db-id data-sub])
-        {:keys [::visible-items ::state]} @view-data
-        {:keys [::selection]} state
-        {:keys [::table-classes
-                ::tr-class-fn
-                ::header-enabled?
-                ::extra-header-row-component
-                ::footer-component
-                ::empty-tbody-component
-                ::drag-drop]} options]
+        {:keys [:visible-items :state]} @view-data
+        {:keys [:selection]} state
+        {:keys [:re-frame-datatable.core/table-classes
+                :re-frame-datatable.core/tr-class-fn
+                :re-frame-datatable.core/header-enabled?
+                :re-frame-datatable.core/extra-header-row-component
+                :re-frame-datatable.core/footer-component
+                :re-frame-datatable.core/empty-tbody-component
+                :re-frame-datatable.core/drag-drop]} options]
 
     [:table.re-frame-datatable
      (when table-classes
        (css-class-str table-classes))
 
      (when-not (= header-enabled? false)
-       [:thead
-        (when extra-header-row-component
-          [extra-header-row-component])
+       [header visible-items state db-id columns-def options])
 
-        [:tr
-         (when (::enabled? selection)
-           [:th {:style {:max-width "16em"}}
-            [:input {:type      "checkbox"
-                     :checked   (clojure.set/subset?
-                                 (->> visible-items (map first) (set))
-                                 (::selected-indexes selection))
-                     :on-change #(when-not (zero? (count visible-items))
-                                   (re-frame/dispatch [::change-table-selection
-                                                       db-id
-                                                       (->> visible-items (map first) (set))
-                                                       (-> % .-target .-checked)]))}]
-            [:br]
-            [:small (str (count (::selected-indexes selection)) " selected")]])
-
-         (doall
-          (for [{:keys [::column-key ::column-label ::sorting]} columns-def]
-            ^{:key (str column-key)}
-            [:th
-             (merge
-              (when (::enabled? sorting)
-                {:style    {:cursor "pointer"}
-                 :on-click #(re-frame/dispatch [::sorting/set-sort-key db-id column-key (::comp-fn sorting)])
-                 :class    "sorted-by"})
-              (when (= column-key (get-in state [::sort ::sort-key]))
-                (css-class-str ["sorted-by"
-                                (condp = (get-in state [::sort ::sort-comp])
-                                  ::sort-asc "asc"
-                                  ::sort-desc "desc"
-                                  "")])))
-             (cond
-               (string? column-label) column-label
-               (fn? column-label) [column-label]
-               :else "")]))]])
-
-
-     [:tbody
-      (if (empty? visible-items)
-        [:tr
-         [:td {:col-span (+ (count columns-def)
-                            (if (::enabled? selection) 1 0))
-               :style    {:text-align "center"}}
-          (if empty-tbody-component
-            [empty-tbody-component]
-            "no items")]]
-
-        (doall
-         (for [[i data-entry] visible-items]
-           ^{:key i}
-           [:tr
-            (merge
-             {}
-             (when tr-class-fn
-               (css-class-str (tr-class-fn data-entry)))
-             ;; Add the attributes for drag/drop operations, if any
-             (drag-drop-attrs drag-drop data-entry))
-
-            (when (::enabled? selection)
-              [:td
-               [:input {:type      "checkbox"
-                        :checked   (contains? (::selected-indexes selection) i)
-                        :on-change #(re-frame/dispatch [::change-row-selection db-id i (-> % .-target .-checked)])}]])
-
-            (doall
-             (for [{:keys [::column-key ::render-fn ::td-class-fn ::td-attr-fn]} columns-def]
-               ^{:key (str i \- column-key)}
-               [:td
-                (merge
-                 {}
-                 ;; If given, apply any custom attributes
-                 (when td-attr-fn
-                   (td-attr-fn (get-in data-entry column-key) data-entry))
-                 (when td-class-fn
-                   (css-class-str (td-class-fn (get-in data-entry column-key) data-entry))))
-
-                (if render-fn
-                  [render-fn (get-in data-entry column-key) data-entry]
-                  (get-in data-entry column-key))]))])))]
+     [body visible-items state db-id columns-def options]
 
      (when footer-component
        [:tfoot

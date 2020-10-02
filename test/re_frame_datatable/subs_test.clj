@@ -32,9 +32,9 @@
 
            (fact "provides state"
                  (reset! app-db (assoc-in {} (p/state-db-path id) ..state..)) => truthy
-                 (::sut/state @d) => ..state..)
+                 (:state @d) => ..state..)
 
            (fact "provides visible items as indexed vector"
                  (swap! app-db assoc ::items [..item-1.. ..item-2..])
-                 (::sut/visible-items @d) => [[0 ..item-1..]
-                                              [1 ..item-2..]]))))
+                 (:visible-items @d) => [[0 ..item-1..]
+                                         [1 ..item-2..]]))))

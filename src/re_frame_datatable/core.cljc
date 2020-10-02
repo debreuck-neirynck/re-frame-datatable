@@ -1,7 +1,5 @@
-(ns re-frame-datatable.core
-  (:require [reagent.core :as reagent]
-            [re-frame.core :as re-frame :refer [trim-v]]
-            [cljs.spec.alpha :as s]
+(ns ^:dev/always re-frame-datatable.core
+  (:require [cljs.spec.alpha :as s]
             [re-frame-datatable.events :as e]
             [re-frame-datatable.subs :as subs]
             [re-frame-datatable.sorting :as sorting]
@@ -87,24 +85,4 @@
          (or (s/valid? ::options options)
              (js/console.error (s/explain-str ::options options)))]}
 
-  (let [view-data (re-frame/subscribe [::subs/data db-id data-sub])]
-
-    (reagent/create-class
-      {:component-will-mount
-       #(re-frame/dispatch [::e/on-will-mount db-id data-sub columns-def options])
-
-
-       :component-did-update
-       (fn [this]
-         (let [[_ db-id data-sub columns-def options] (reagent/argv this)]
-           (re-frame/dispatch [::e/on-did-update db-id data-sub columns-def options])
-           (when (not= (get-in @view-data [::state ::total-items]) (count @(re-frame/subscribe data-sub)))
-             (re-frame/dispatch [::select-page db-id @(re-frame/subscribe [::pagination-state db-id data-sub]) 0]))))
-
-
-       :component-will-unmount
-       #(re-frame/dispatch [::e/on-will-unmount db-id])
-
-
-       :reagent-render
-       r/render-table})))
+  (r/render-table db-id data-sub columns-def options))

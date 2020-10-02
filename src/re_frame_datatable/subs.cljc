@@ -30,8 +30,8 @@
                                   (take (or per-page 0)))
                              coll)))]
 
-     {::visible-items (->> items
-                           (map-indexed vector)
-                           (sort-data)
-                           (paginate-data))
-      ::state         state})))
+     {:visible-items (->> items
+                          (map-indexed vector)
+                          (sort-data)
+                          (paginate-data))
+      :state         state})))

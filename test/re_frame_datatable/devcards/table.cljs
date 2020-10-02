@@ -7,16 +7,60 @@
 (rf/clear-subscription-cache!)
 
 (rf/reg-sub
- ::test-sub
+ ::empty-list
  (fn [db _]
-   [{:name "Test value"}]))
+   []))
 
-(defcard basic-table
-  "Basic table without any special stuff"
+(defcard empty-table
+  "Empty table"
   (dc/reagent
    [dt/datatable
-    :test-id
-    [::test-sub]
+    :empty-table
+    [::empty-list]
     [{::dt/column-key [:name]}]
     {}])
+  {::dt/table-classes ["table"]})
+
+(defn- custom-empty-body []
+  [:i "Custom component for empty tables"])
+
+(defcard custom-empty-table
+  "Empty table with custom component"
+  (dc/reagent
+   [dt/datatable
+    :empty-table
+    [::empty-list]
+    [{::dt/column-key [:name]}]
+    {::dt/empty-tbody-component custom-empty-body}])
+  {})
+
+(rf/reg-sub
+ ::simple-list
+ (fn [db _]
+   [{:name "Test value"
+     :age 43}]))
+
+(defcard table-without-header
+  "Basic table without headers"
+  (dc/reagent
+   [dt/datatable
+    :basic-table
+    [::simple-list]
+    [{::dt/column-key [:name]}
+     {::dt/column-key [:age]}]
+    {::dt/table-classes ["table"]
+     ::dt/header-enabled? false}])
+  {})
+
+(defcard table-with-header
+  "Basic table with headers"
+  (dc/reagent
+   [dt/datatable
+    :basic-table
+    [::simple-list]
+    [{::dt/column-key [:name]
+      ::dt/column-label "name"}
+     {::dt/column-key [:age]
+      ::dt/column-label "age"}]
+    {::dt/table-classes ["table"]}])
   {})
