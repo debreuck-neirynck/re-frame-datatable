@@ -1,19 +1,19 @@
 (ns re-frame-datatable.subs
   (:require [re-frame.core :as re-frame]
-            [re-frame-datatable.paths :refer :all]))
+            [re-frame-datatable.paths :as p]))
 
 (re-frame/reg-sub
  ::state
  (fn [db [_ db-id]]
-   (get-in db (state-db-path db-id))))
+   (get-in db (p/state-db-path db-id))))
 
 (re-frame/reg-sub
  ::data
- (fn [[_ db-id data-sub]]
+ (fn data-gathere [[_ db-id data-sub] _]
    [(re-frame/subscribe data-sub)
     (re-frame/subscribe [::state db-id])])
 
- (fn [[items state]]
+ (fn data-provider [[items state] _]
    (let [sort-data (fn [coll]
                      (let [{:keys [::sort-key ::sort-comp ::sort-fn]} (::sort state)]
                        (if sort-key

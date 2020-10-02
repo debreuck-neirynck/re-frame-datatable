@@ -1,7 +1,7 @@
 (ns re-frame-datatable.events
   (:require [re-frame.core :as re-frame :refer [trim-v]]
-            [re-frame-datatable.paths :refer :all]
-            [re-frame-datatable.defaults :refer :all]))
+            [re-frame-datatable.paths :as p]
+            [re-frame-datatable.defaults :as d]))
 
 (re-frame/reg-event-db
  ;; Called before the component is mounted into the DOM, this sets the configuration
@@ -10,12 +10,12 @@
  [trim-v]
  (fn [db [db-id data-sub columns-def options]]
    (-> db
-       (assoc-in (columns-def-db-path db-id)
+       (assoc-in (p/columns-def-db-path db-id)
                  columns-def)
-       (assoc-in (options-db-path db-id)
+       (assoc-in (p/options-db-path db-id)
                  options)
-       (assoc-in (state-db-path db-id)
-                 {::pagination  (merge {::per-page default-per-page
+       (assoc-in (p/state-db-path db-id)
+                 {::pagination  (merge {::per-page d/default-per-page
                                         ::cur-page 0}
                                        (select-keys (::pagination options) [::per-page ::enabled?]))
                   ::total-items (count @(re-frame/subscribe data-sub))
@@ -29,12 +29,12 @@
  [trim-v]
  (fn [db [db-id data-sub columns-def options]]
    (-> db
-       (assoc-in (columns-def-db-path db-id)
+       (assoc-in (p/columns-def-db-path db-id)
                  columns-def)
-       (assoc-in (options-db-path db-id)
+       (assoc-in (p/options-db-path db-id)
                  options)
 
-       (assoc-in (conj (state-db-path db-id) ::total-items) (count @(re-frame/subscribe data-sub))))))
+       (assoc-in (conj (p/state-db-path db-id) ::total-items) (count @(re-frame/subscribe data-sub))))))
 
 (re-frame/reg-event-db
  ;; Called before the component is removed from the dom tree.  This will remove the information from
@@ -42,11 +42,11 @@
  ::on-will-unmount
  [trim-v]
  (fn [db [db-id]]
-   (update-in db root-db-path dissoc db-id)))
+   (update-in db p/root-db-path dissoc db-id)))
 
 (re-frame/reg-event-db
  ;; Updates the db state with given value at given path
  ::change-state-value
  [trim-v]
  (fn [db [db-id state-path new-val]]
-   (assoc-in db (vec (concat (state-db-path db-id) state-path)) new-val)))
+   (assoc-in db (vec (concat (p/state-db-path db-id) state-path)) new-val)))

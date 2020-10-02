@@ -1,6 +1,6 @@
 (ns re-frame-datatable.selection
   (:require [re-frame.core :as re-frame :refer [trim-v]]
-            [re-frame-datatable.paths :refer :all]))
+            [re-frame-datatable.paths :as p]))
 
 (re-frame/reg-sub
   :re-frame-datatable.core/selected-items
@@ -19,7 +19,7 @@
   :re-frame-datatable.core/change-row-selection
   [trim-v]
   (fn [db [db-id row-index selected?]]
-    (update-in db (vec (concat (state-db-path db-id) [::selection ::selected-indexes]))
+    (update-in db (vec (concat (p/state-db-path db-id) [::selection ::selected-indexes]))
                (if selected? conj disj) row-index)))
 
 
@@ -27,7 +27,7 @@
   :re-frame-datatable.core/change-table-selection
   [trim-v]
   (fn [db [db-id indexes selected?]]
-    (let [selection-indexes-path (vec (concat (state-db-path db-id) [::selection ::selected-indexes]))
+    (let [selection-indexes-path (vec (concat (p/state-db-path db-id) [::selection ::selected-indexes]))
           selection (get-in db selection-indexes-path)]
       (assoc-in db selection-indexes-path
                 (if selected?
@@ -39,5 +39,5 @@
   :re-frame-datatable.core/unselect-all-rows
   [trim-v]
   (fn [db [db-id]]
-    (assoc-in db (vec (concat (state-db-path db-id) [::selection ::selected-indexes])) #{})))
+    (assoc-in db (vec (concat (p/state-db-path db-id) [::selection ::selected-indexes])) #{})))
 

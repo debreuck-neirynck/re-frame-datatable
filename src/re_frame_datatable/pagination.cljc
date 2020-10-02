@@ -1,7 +1,7 @@
 (ns re-frame-datatable.pagination
   (:require [re-frame.core :as re-frame :refer [trim-v]]
-            [re-frame-datatable.paths :refer :all]
-            [re-frame-datatable.subs :as subs]))
+            [re-frame-datatable.subs :as subs]
+            [re-frame-datatable.events :as e]))
 
 (re-frame/reg-sub
  ;; For compatibility, don't use the pagination ns
@@ -27,7 +27,7 @@
  (fn [{:keys [db]} [db-id pagination-state]]
    (let [{:keys [::cur-page ::pages]} pagination-state]
      {:db       db
-      :dispatch [::change-state-value db-id [::pagination ::cur-page] (min (inc cur-page) (dec (count pages)))]})))
+      :dispatch [::e/change-state-value db-id [::pagination ::cur-page] (min (inc cur-page) (dec (count pages)))]})))
 
 
 (re-frame/reg-event-fx
@@ -36,7 +36,7 @@
  (fn [{:keys [db]} [db-id pagination-state]]
    (let [{:keys [::cur-page]} pagination-state]
      {:db       db
-      :dispatch [::change-state-value db-id [::pagination ::cur-page] (max (dec cur-page) 0)]})))
+      :dispatch [::e/change-state-value db-id [::pagination ::cur-page] (max (dec cur-page) 0)]})))
 
 
 (re-frame/reg-event-fx
@@ -44,7 +44,7 @@
  [trim-v]
  (fn [{:keys [db]} [db-id pagination-state page-idx]]
    {:db       db
-    :dispatch [::change-state-value db-id [::pagination ::cur-page] page-idx]}))
+    :dispatch [::e/change-state-value db-id [::pagination ::cur-page] page-idx]}))
 
 
 (re-frame/reg-event-fx
@@ -53,4 +53,4 @@
  (fn [{:keys [db]} [db-id pagination-state per-page]]
    {:db         db
     :dispatch-n [[::select-page db-id pagination-state 0]
-                 [::change-state-value db-id [::pagination ::per-page] per-page]]}))
+                 [::e/change-state-value db-id [::pagination ::per-page] per-page]]}))

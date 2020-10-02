@@ -1,0 +1,12 @@
+;; shadow-cljs configuration
+{:lein true
+
+ :dev-http {8000 {:root "dev-resources/public"}}
+
+ :builds
+ {:cards
+  {:output-dir "dev-resources/public/compiled"
+   :asset-path "/compiled"
+   :target :browser
+   :compiler-options {:devcards true}
+   :modules {:main {:init-fn re-frame-datatable.devcards.core/main}}}}}

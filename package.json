@@ -1,0 +1,14 @@
+{
+   "name": "re-frame-datatable",
+   "version": "0.6.2-SNAPSHOT",
+   "private": true,
+   "devDependencies": {
+      "shadow-cljs": "2.11.4",
+      "marked": "0.8.2",
+      "create-react-class": "15.6.3"
+   },
+   "dependencies": {
+      "react": "16.13.0",
+      "react-dom": "16.13.0"
+   }
+}

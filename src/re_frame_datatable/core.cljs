@@ -1,5 +1,4 @@
 (ns re-frame-datatable.core
-  (:require-macros [reagent.ratom :refer [reaction]])
   (:require [reagent.core :as reagent]
             [re-frame.core :as re-frame :refer [trim-v]]
             [cljs.spec.alpha :as s]
@@ -8,7 +7,6 @@
             [re-frame-datatable.sorting :as sorting]
             [re-frame-datatable.pagination :as p]
             [re-frame-datatable.selection]
-            [re-frame-datatable.paths :refer :all]
             [re-frame-datatable.rendering :as r]))
 
 
@@ -76,21 +74,6 @@
                   ::drag-drop])))
 
 
-; --- Re-frame database paths ---
-
-(def root-db-path [::re-frame-datatable])
-(defn db-path-for [db-path db-id]
-  (vec (concat (conj root-db-path db-id)
-               db-path)))
-
-(def columns-def-db-path (partial db-path-for [::columns-def]))
-(def options-db-path (partial db-path-for [::options]))
-(def state-db-path (partial db-path-for [::state]))
-(def sort-key-db-path (partial db-path-for [::state ::sort ::sort-key]))
-(def sort-comp-order-db-path (partial db-path-for [::state ::sort ::sort-comp]))
-(def sort-comp-fn-db-path (partial db-path-for [::state ::sort ::sort-fn]))
-
-
 ; --- Views ---
 ; ----------------------------------------------------------------------------------------------------------------------
 
@@ -108,20 +91,20 @@
 
     (reagent/create-class
       {:component-will-mount
-       #(re-frame/dispatch [::on-will-mount db-id data-sub columns-def options])
+       #(re-frame/dispatch [::e/on-will-mount db-id data-sub columns-def options])
 
 
        :component-did-update
        (fn [this]
          (let [[_ db-id data-sub columns-def options] (reagent/argv this)]
-           (re-frame/dispatch [::on-did-update db-id data-sub columns-def options])
+           (re-frame/dispatch [::e/on-did-update db-id data-sub columns-def options])
            (when (not= (get-in @view-data [::state ::total-items]) (count @(re-frame/subscribe data-sub)))
              (re-frame/dispatch [::select-page db-id @(re-frame/subscribe [::pagination-state db-id data-sub]) 0]))))
 
 
        :component-will-unmount
-       #(re-frame/dispatch [::on-will-unmount db-id])
+       #(re-frame/dispatch [::e/on-will-unmount db-id])
 
 
        :reagent-render
-       r/render})))
+       r/render-table})))
