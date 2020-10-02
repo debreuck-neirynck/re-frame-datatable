@@ -1,10 +1,11 @@
 (ns ^:dev/always re-frame-datatable.core
-  (:require [cljs.spec.alpha :as s]
+  (:require #?(:cljs [cljs.spec.alpha :as s]
+               :clj [clojure.spec.alpha :as s])
             [re-frame-datatable.events :as e]
             [re-frame-datatable.subs :as subs]
             [re-frame-datatable.sorting :as sorting]
             [re-frame-datatable.pagination :as p]
-            [re-frame-datatable.selection]
+            [re-frame-datatable.selection :as sel]
             [re-frame-datatable.rendering :as r]))
 
 
@@ -72,17 +73,18 @@
                   ::drag-drop])))
 
 
-; --- Views ---
-; ----------------------------------------------------------------------------------------------------------------------
+(def print-error
+  #?(:cljs js/console.error
+     :clj println))
 
 (defn datatable [db-id data-sub columns-def & [options]]
   {:pre [(or (s/valid? ::db-id db-id)
-             (js/console.error (s/explain-str ::db-id db-id)))
+             (print-error (s/explain-str ::db-id db-id)))
 
          (or (s/valid? ::columns-def columns-def)
-             (js/console.error (s/explain-str ::columns-def columns-def)))
+             (print-error (s/explain-str ::columns-def columns-def)))
 
          (or (s/valid? ::options options)
-             (js/console.error (s/explain-str ::options options)))]}
+             (print-error (s/explain-str ::options options)))]}
 
   (r/render-table db-id data-sub columns-def options))

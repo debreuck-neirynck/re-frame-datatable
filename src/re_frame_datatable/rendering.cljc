@@ -24,6 +24,10 @@
     drop-fn (assoc :on-drop (drop-fn row))
     drag-over-fn (assoc :on-drag-over (drag-over-fn row))))
 
+(defn- checked? [x]
+  #?(:cljs (-> x .-target .-checked)
+     :clj (get-in x [:target :checked])))
+
 (defn- header [visible-items state db-id columns-def options]
   (let [{:keys [:selection]} state
         {:keys [:re-frame-datatable.core/extra-header-row-component]} options]
@@ -42,7 +46,7 @@
                                 (re-frame/dispatch [::change-table-selection
                                                     db-id
                                                     (->> visible-items (map first) (set))
-                                                    (-> % .-target .-checked)]))}]
+                                                    checked?]))}]
          [:br]
          [:small (str (count (:selected-indexes selection)) " selected")]])
 
@@ -98,7 +102,7 @@
      [:td
       [:input {:type      "checkbox"
                :checked   (contains? (::selected-indexes selection) i)
-               :on-change #(re-frame/dispatch [::change-row-selection db-id i (-> % .-target .-checked)])}]])
+               :on-change #(re-frame/dispatch [::change-row-selection db-id i checked?])}]])
 
    (doall
     (for [{:keys [:re-frame-datatable.core/column-key
