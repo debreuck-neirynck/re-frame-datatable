@@ -28,7 +28,29 @@
       {::dt/column-key [:value]
        ::dt/column-label "Value"}]
      {::dt/table-classes ["table"]
-      ::dt/pagination {::dt/enabled? true}}]
+      ::dt/pagination {::dt/enabled? true
+                       ::dt/per-page 10}}]
     [v/default-pagination-controls
      :basic-pagination
+     [::test-data]]]))
+
+(defcard page-selector
+  "Table with page selector"
+  (dc/reagent
+   [:div
+    [dt/datatable
+     :page-selector
+     [::test-data]
+     [{::dt/column-key [:name]
+       ::dt/column-label "Name"}
+      {::dt/column-key [:value]
+       ::dt/column-label "Value"}]
+     {::dt/table-classes ["table"]
+      ::dt/pagination {::dt/enabled? true
+                       ::dt/per-page 10}}]
+    [v/default-pagination-controls
+     :page-selector
+     [::test-data]]
+    [v/per-page-selector
+     :page-selector
      [::test-data]]]))

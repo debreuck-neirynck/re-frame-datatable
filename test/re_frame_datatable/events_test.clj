@@ -2,7 +2,8 @@
   (:require [re-frame-datatable
              [events :as e]
              [subs]
-             [paths :as p]]
+             [paths :as p]
+             [db :as db]]
             [midje.sweet :refer :all]
             [re-frame
              [core :as rf]
@@ -10,9 +11,14 @@
 
 (facts "about `on-will-mount`"
        (fact "stores config in db"
-             (rf/reg-sub ::test-sub (constantly []))
              (reset! app-db {}) => truthy
              (rf/dispatch-sync [::e/on-will-mount ::test-id [::test-sub] ..cols.. ..opts..])
-             (get-in @app-db (p/state-db-path ::test-id)) => map?
-             (get-in @app-db (p/columns-def-db-path ::test-id)) => ..cols..
-             (get-in @app-db (p/options-db-path ::test-id)) => ..opts..))
+             (db/configuration @app-db ::test-id) => {:sub [::test-sub]
+                                                      :columns ..cols..
+                                                      :options ..opts..}))
+
+(facts "about `change-state-value`"
+       (fact "sets given value in state"
+             (reset! app-db {}) => map?
+             (rf/dispatch-sync [::e/change-state-value ::test-id [:some :path] ..value..])
+             (db/state @app-db ::test-id) => {:some {:path ..value..}}))

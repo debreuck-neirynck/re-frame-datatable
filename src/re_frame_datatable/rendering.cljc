@@ -137,6 +137,7 @@
          (into [:tbody]))))
 
 (defn render-table [db-id data-sub columns-def options]
+  ;; Store initial configuration in db
   (re-frame/dispatch [::e/on-will-mount db-id data-sub columns-def options])
   (fn [& _]
     (let [view-data (re-frame/subscribe [::subs/data db-id data-sub (:re-frame-datatable.core/pagination options)])

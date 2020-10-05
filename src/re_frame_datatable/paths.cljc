@@ -1,6 +1,8 @@
 (ns re-frame-datatable.paths
   "Re-frame database path functions")
 
+;;; DEPRECATED Replaced by `db` namespace
+
 (def root-db-path [::re-frame-datatable])
 (defn db-path-for [db-path db-id]
   (vec (concat (conj root-db-path db-id)

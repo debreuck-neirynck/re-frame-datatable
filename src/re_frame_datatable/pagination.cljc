@@ -56,5 +56,5 @@
  [trim-v]
  (fn [{:keys [db]} [db-id pagination-state per-page]]
    {:db         db
-    :dispatch-n [[::select-page db-id pagination-state 0]
+    :dispatch-n [[:re-frame-datatable.core/select-page db-id pagination-state 0]
                  [::e/change-state-value db-id [::p/pagination :re-frame-datatable.core/per-page] per-page]]}))

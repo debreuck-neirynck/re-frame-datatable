@@ -2,7 +2,8 @@
   (:require [re-frame-datatable
              [core :as dt]
              [subs :as sut]
-             [paths :as p]]
+             [paths :as p]
+             [db :as db]]
             [midje.sweet :refer :all]
             [re-frame
              [core :as rf]
@@ -19,17 +20,17 @@
 
          (fact "returns current component state"
                (let [state {:key :value}]
-                 (reset! app-db (assoc-in {} (p/state-db-path id) state)) => truthy
-                 @s => state))
+                 (reset! app-db (db/set-state {} id state)) => map?
+                 @s => state))))
 
-         (fact "passes pagination info"
-               (let [s (rf/subscribe [::sut/state id {:key :pagination}])]
-                 (::p/pagination @s) => {:key :pagination}))
+         ;; (fact "passes pagination info"
+         ;;       (let [s (rf/subscribe [::sut/state id])]
+         ;;         (::p/pagination @s) => {:key :pagination}))
 
-         (fact "keeps existing pagination info"
-               (let [s (rf/subscribe [::sut/state id {:key :pagination}])]
-                 (reset! app-db (assoc-in {} (p/db-path-for [::p/state ::p/pagination :existing] id) :value))
-                 (::p/pagination @s) => (contains {:existing :value})))))
+         ;; (fact "keeps existing pagination info"
+         ;;       (let [s (rf/subscribe [::sut/state id {:key :pagination}])]
+         ;;         (reset! app-db (assoc-in {} (p/db-path-for [::p/state ::p/pagination :existing] id) :value))
+         ;;         (::p/pagination @s) => (contains {:existing :value})))))
 
 (facts "about `data`"
        (let [id ::test-id
@@ -42,7 +43,7 @@
                  d => some?)
 
            (fact "provides state"
-                 (reset! app-db (assoc-in {} (p/state-db-path id) {:key :value})) => truthy
+                 (reset! app-db (db/set-state {} id {:key :value})) => truthy
                  (:state @d) => {:key :value})
 
            (fact "provides visible items as indexed vector"
@@ -54,7 +55,7 @@
                  (swap! app-db (fn [db]
                                  (-> db
                                      (assoc ::items [{:value 2} {:value 1}])
-                                     (assoc-in (p/sort-key-db-path id) [:value]))))
+                                     (db/set-sorting id {:sort-key [:value]})))) => map?
                  (:visible-items @d) => [[1 {:value 1}]
                                          [0 {:value 2}]])
 
@@ -62,17 +63,19 @@
                  (swap! app-db (fn [db]
                                  (-> db
                                      (assoc ::items [{:value "first"} {:value "second"}])
-                                     (assoc-in (p/sort-key-db-path id) [:value])
-                                     (assoc-in (p/sort-comp-fn-db-path id) (fn [a b]
-                                                                             (compare (last a) (last b)))))))
+                                     (db/set-sorting id {:sort-key [:value]
+                                                         :sort-fn (fn [a b]
+                                                                    (compare (last a) (last b)))})))) => map?
                  (:visible-items @d) => [[1 {:value "second"}]
                                          [0 {:value "first"}]])
 
-           (let [d (rf/subscribe [::sut/data id [sub-id] {::dt/enabled? true
-                                                          ::dt/per-page 5}])]
+           (let [d (rf/subscribe [::sut/data id [sub-id]])]
              (fact "applies pagination"
-                   (swap! app-db assoc ::items (->> (range 100)
-                                                    (map (fn [v] {:item v}))))
+                   (reset! app-db (-> {}
+                                      (assoc ::items (->> (range 100)
+                                                          (map (fn [v] {:item v}))))
+                                      (db/set-options id {::dt/pagination {::dt/enabled? true
+                                                                           ::dt/per-page 5}}))) => map?
                    (count (:visible-items @d)) => 5)
 
              (fact "returns current page"
@@ -80,6 +83,8 @@
                                    (-> db
                                        (assoc ::items (->> (range 100)
                                                            (map (fn [v] {:item v}))))
-                                       (assoc-in (p/db-path-for [::p/state ::p/pagination ::p/cur-page] id) 1))))
+                                       (db/set-options id {::dt/pagination {::dt/enabled? true
+                                                                            ::dt/per-page 5}})
+                                       (db/set-state id {:pagination {:cur-page 1}})))) => map?
                    (-> (:visible-items @d)
                        (first)) => [5 {:item 5}])))))
