@@ -29,9 +29,9 @@
                (::dt/per-page @s) => number?)
 
          (fact "uses settings from state"
-               (reset! app-db (assoc {}
-                                     (p/state-db-path ::test-id)
-                                     {::dt/per-page 10
-                                      ::p/cur-page 7}))
+               (reset! app-db (assoc-in {}
+                                        (conj (p/state-db-path ::test-id) ::p/pagination)
+                                        {::dt/per-page 10
+                                         ::p/cur-page 7}))
                @s => (contains {::dt/per-page 10
                                 ::dt/cur-page 7}))))

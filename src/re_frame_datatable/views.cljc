@@ -30,7 +30,7 @@
            :on-change #(re-frame/dispatch
                          [::dt/select-page
                           db-id @pagination-state
-                          target-value])}
+                          (target-value %)])}
           (doall
             (for [page-index (range total-pages)]
               ^{:key page-index}
@@ -62,7 +62,7 @@
            :on-change #(re-frame/dispatch
                          [::dt/set-per-page-value
                           db-id @pagination-state
-                          target-value])}
+                          (target-value %)])}
           (doall
             (for [per-page-option (->> per-page-values
                                        (cons per-page)

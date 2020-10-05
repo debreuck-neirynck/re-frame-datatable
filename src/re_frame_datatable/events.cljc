@@ -15,9 +15,11 @@
        (assoc-in (p/options-db-path db-id)
                  options)
        (assoc-in (p/state-db-path db-id)
-                 {::pagination  (merge {::per-page d/default-per-page
-                                        ::cur-page 0}
-                                       (select-keys (::pagination options) [::per-page ::enabled?]))
+                 {::p/pagination  (merge {:re-frame-datatable.core/per-page d/default-per-page
+                                          ::p/cur-page 0}
+                                         (select-keys (:re-frame-datatable.core/pagination options)
+                                                      [:re-frame-datatable.core/per-page
+                                                       :re-frame-datatable.core/enabled?]))
                   ::total-items (count @(re-frame/subscribe data-sub))
                   ::selection   (merge {::selected-indexes (if (get-in options [::selection ::enabled?])
                                                              (or (get-in options [::selection ::selected-indexes]) #{})

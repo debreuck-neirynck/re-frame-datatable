@@ -2,6 +2,7 @@
   "Rendering functions for the table"
   (:require [re-frame.core :as re-frame]
             [re-frame-datatable.paths :as p]
+            [re-frame-datatable.events :as e]
             [re-frame-datatable.subs :as subs]
             [re-frame-datatable.sorting :as sorting]))
 
@@ -136,21 +137,23 @@
          (into [:tbody]))))
 
 (defn render-table [db-id data-sub columns-def options]
-  (let [view-data (re-frame/subscribe [::subs/data db-id data-sub (:re-frame-datatable.core/pagination options)])
-        {:keys [:visible-items :state]} @view-data
-        {:keys [:re-frame-datatable.core/table-classes
-                :re-frame-datatable.core/header-enabled?
-                :re-frame-datatable.core/footer-component]} options]
+  (re-frame/dispatch [::e/on-will-mount db-id data-sub columns-def options])
+  (fn [& _]
+    (let [view-data (re-frame/subscribe [::subs/data db-id data-sub (:re-frame-datatable.core/pagination options)])
+          {:keys [:visible-items :state]} @view-data
+          {:keys [:re-frame-datatable.core/table-classes
+                  :re-frame-datatable.core/header-enabled?
+                  :re-frame-datatable.core/footer-component]} options]
 
-    [:table.re-frame-datatable
-     (when table-classes
-       (css-class-str table-classes))
+      [:table.re-frame-datatable
+       (when table-classes
+         (css-class-str table-classes))
 
-     (when-not (= header-enabled? false)
-       [header visible-items state db-id columns-def options])
+       (when-not (= header-enabled? false)
+         [header visible-items state db-id columns-def options])
 
-     [body visible-items state db-id columns-def options]
+       [body visible-items state db-id columns-def options]
 
-     (when footer-component
-       [:tfoot
-        [footer-component]])]))
+       (when footer-component
+         [:tfoot
+          [footer-component]])])))
