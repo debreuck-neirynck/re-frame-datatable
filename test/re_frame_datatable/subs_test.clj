@@ -1,5 +1,6 @@
 (ns re-frame-datatable.subs-test
   (:require [re-frame-datatable
+             [core :as dt]
              [subs :as sut]
              [paths :as p]]
             [midje.sweet :refer :all]
@@ -17,8 +18,18 @@
                s => some?)
 
          (fact "returns current component state"
-               (reset! app-db (assoc-in {} (p/state-db-path id) ..state..)) => truthy
-               @s => ..state..)))
+               (let [state {:key :value}]
+                 (reset! app-db (assoc-in {} (p/state-db-path id) state)) => truthy
+                 @s => state))
+
+         (fact "passes pagination info"
+               (let [s (rf/subscribe [::sut/state id {:key :pagination}])]
+                 (::p/pagination @s) => {:key :pagination}))
+
+         (fact "keeps existing pagination info"
+               (let [s (rf/subscribe [::sut/state id {:key :pagination}])]
+                 (reset! app-db (assoc-in {} (p/db-path-for [::p/state ::p/pagination :existing] id) :value))
+                 (::p/pagination @s) => (contains {:existing :value})))))
 
 (facts "about `data`"
        (let [id ::test-id
@@ -55,4 +66,20 @@
                                      (assoc-in (p/sort-comp-fn-db-path id) (fn [a b]
                                                                              (compare (last a) (last b)))))))
                  (:visible-items @d) => [[1 {:value "second"}]
-                                         [0 {:value "first"}]]))))
+                                         [0 {:value "first"}]])
+
+           (let [d (rf/subscribe [::sut/data id [sub-id] {::dt/enabled? true
+                                                          ::dt/per-page 5}])]
+             (fact "applies pagination"
+                   (swap! app-db assoc ::items (->> (range 100)
+                                                    (map (fn [v] {:item v}))))
+                   (count (:visible-items @d)) => 5)
+
+             (fact "returns current page"
+                   (swap! app-db (fn [db]
+                                   (-> db
+                                       (assoc ::items (->> (range 100)
+                                                           (map (fn [v] {:item v}))))
+                                       (assoc-in (p/db-path-for [::p/state ::p/pagination ::p/cur-page] id) 1))))
+                   (-> (:visible-items @d)
+                       (first)) => [5 {:item 5}])))))

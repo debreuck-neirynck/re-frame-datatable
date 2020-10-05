@@ -17,4 +17,3 @@
            (assoc-in (p/sort-key-db-path db-id) sort-key)
            (assoc-in (p/sort-comp-fn-db-path db-id) comp-fn)
            (assoc-in (p/sort-comp-order-db-path db-id) cur-sort-comp))))))
-

@@ -5,26 +5,32 @@
 
 (re-frame/reg-sub
  ::state
- (fn [db [_ db-id]]
-   (get-in db (p/state-db-path db-id))))
+ (fn [db [_ db-id pagination]]
+   (cond-> (get-in db (p/state-db-path db-id))
+     pagination (update ::p/pagination merge pagination))))
 
 (re-frame/reg-sub
  ::data
- (fn data-gathere [[_ db-id data-sub] _]
+ (fn data-gatherer [[_ db-id data-sub pagination] _]
    [(re-frame/subscribe data-sub)
-    (re-frame/subscribe [::state db-id])])
+    (re-frame/subscribe [::state db-id pagination])])
 
  (fn data-provider [[items state] _]
    (let [sort-data (fn [coll]
-                     (let [{:keys [::p/sort-key ::p/sort-comp ::p/sort-fn]} (::p/sort state)]
+                     (let [{:keys [::p/sort-key ::p/sort-comp ::p/sort-fn]
+                            :or {sort-fn compare}} (::p/sort state)]
                        (if sort-key
                          (cond->> coll
-                           true (sort-by #(get-in (second %) sort-key) (or sort-fn compare))
+                           true (sort-by #(get-in (second %) sort-key) sort-fn)
                            (= ::s/sort-desc sort-comp) (reverse))
                          coll)))
 
          paginate-data (fn [coll]
-                         (let [{:keys [::cur-page ::per-page ::enabled?]} (::pagination state)]
+                         (let [{:keys [:re-frame-datatable.core/per-page
+                                       :re-frame-datatable.core/enabled?
+                                       ::p/cur-page]
+                                :or {per-page 10
+                                     cur-page 0}} (::p/pagination state)]
                            (if enabled?
                              (->> coll
                                   (drop (* (or cur-page 0) (or per-page 0)))

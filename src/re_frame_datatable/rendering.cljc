@@ -136,7 +136,7 @@
          (into [:tbody]))))
 
 (defn render-table [db-id data-sub columns-def options]
-  (let [view-data (re-frame/subscribe [::subs/data db-id data-sub])
+  (let [view-data (re-frame/subscribe [::subs/data db-id data-sub (:re-frame-datatable.core/pagination options)])
         {:keys [:visible-items :state]} @view-data
         {:keys [:re-frame-datatable.core/table-classes
                 :re-frame-datatable.core/header-enabled?
