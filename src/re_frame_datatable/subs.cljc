@@ -1,7 +1,8 @@
 (ns re-frame-datatable.subs
   (:require [re-frame.core :as re-frame]
             [re-frame-datatable.paths :as p]
-            [re-frame-datatable.sorting :as s]))
+            [re-frame-datatable.sorting :as s]
+            [re-frame-datatable.defaults :as d]))
 
 (re-frame/reg-sub
  ::state
@@ -29,7 +30,7 @@
                          (let [{:keys [:re-frame-datatable.core/per-page
                                        :re-frame-datatable.core/enabled?
                                        ::p/cur-page]
-                                :or {per-page 10
+                                :or {per-page d/default-per-page
                                      cur-page 0}} (::p/pagination state)]
                            (if enabled?
                              (->> coll

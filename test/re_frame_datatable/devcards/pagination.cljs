@@ -3,7 +3,8 @@
   (:require [reagent.core]
             [devcards.core :as dc :refer [defcard]]
             [re-frame.core :as rf]
-            [re-frame-datatable.core :as dt]))
+            [re-frame-datatable.core :as dt]
+            [re-frame-datatable.views :as v]))
 
 (rf/clear-subscription-cache!)
 
@@ -18,13 +19,16 @@
 (defcard basic-pagination
   "Table with basic pagination"
   (dc/reagent
-   [dt/datatable
-    :basic-pagination
-    [::test-data]
-    [{::dt/column-key [:name]
-      ::dt/column-label "Name"}
-     {::dt/column-key [:value]
-      ::dt/column-label "Value"}]
-    {::dt/table-classes ["table"]
-     ::dt/pagination {::dt/enabled? true}}])
-  {})
+   [:div
+    [dt/datatable
+     :basic-pagination
+     [::test-data]
+     [{::dt/column-key [:name]
+       ::dt/column-label "Name"}
+      {::dt/column-key [:value]
+       ::dt/column-label "Value"}]
+     {::dt/table-classes ["table"]
+      ::dt/pagination {::dt/enabled? true}}]
+    [v/default-pagination-controls
+     :basic-pagination
+     [::test-data]]]))

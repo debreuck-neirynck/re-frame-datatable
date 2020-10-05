@@ -1,24 +1,27 @@
 (ns re-frame-datatable.pagination
   (:require [re-frame.core :as re-frame :refer [trim-v]]
             [re-frame-datatable.subs :as subs]
-            [re-frame-datatable.events :as e]))
+            [re-frame-datatable.events :as e]
+            [re-frame-datatable.defaults :as d]
+            [re-frame-datatable.paths :as p]))
 
 (re-frame/reg-sub
  ;; For compatibility, don't use the pagination ns
  :re-frame-datatable.core/pagination-state
- (fn [[_ db-id data-sub]]
+ (fn [[_ db-id data-sub] _]
    [(re-frame/subscribe [::subs/state db-id])
     (re-frame/subscribe data-sub)])
- (fn [[state items]]
-   (let [{:keys [::pagination]} state]
-     (merge
-      (select-keys pagination [::per-page])
-      {::cur-page (or (::cur-page pagination) 0)
-       ::pages    (->> items
-                       (map-indexed vector)
-                       (map first)
-                       (partition-all (or (::per-page pagination) 1))
-                       (mapv (fn [i] [(first i) (last i)])))}))))
+ (fn [[state items] _]
+   (let [{:keys [::p/pagination]} state
+         pp (get pagination :re-frame-datatable.core/per-page d/default-per-page)]
+     {:re-frame-datatable.core/cur-page (or (::p/cur-page pagination) 0)
+      :re-frame-datatable.core/pages    (->> items
+                                             (map-indexed vector)
+                                             (map first)
+                                             (partition-all
+                                              (or pp 1))
+                                             (mapv (fn [i] [(first i) (last i)])))
+      :re-frame-datatable.core/per-page (or pp d/default-per-page)})))
 
 
 (re-frame/reg-event-fx

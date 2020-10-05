@@ -1,10 +1,15 @@
 (ns re-frame-datatable.views
   (:require [re-frame.core :as re-frame]
-            [re-frame-datatable.core :as dt]))
+            [re-frame-datatable.core :as dt]
+            [re-frame-datatable.defaults :as d]))
+
+(defn- target-value [e]
+  #?(:cljs (js/parseInt (-> e .-target .-value))
+     :clj (Integer/parseInt (get-in e [:target :value]))))
 
 (defn default-pagination-controls [db-id data-sub]
   (let [pagination-state (re-frame/subscribe [::dt/pagination-state db-id data-sub])]
-    (fn []
+    (fn [_ _]
       (let [{:keys [::dt/cur-page ::dt/pages]} @pagination-state
             total-pages (if (pos? (count pages)) (count pages) 1)]
         [:div.re-frame-datatable.page-selector
@@ -21,11 +26,11 @@
             (str \u25C4 " PREVIOUS ")])
 
          [:select
-          {:value     cur-page
+          {:value     (or cur-page "")
            :on-change #(re-frame/dispatch
                          [::dt/select-page
                           db-id @pagination-state
-                          (js/parseInt (-> % .-target .-value))])}
+                          target-value])}
           (doall
             (for [page-index (range total-pages)]
               ^{:key page-index}
@@ -43,8 +48,6 @@
                              db-id @pagination-state]))}
             (str " NEXT " \u25BA)])]))))
 
-
-
 (defn per-page-selector [db-id data-sub]
   (let [pagination-state (re-frame/subscribe [::dt/pagination-state db-id data-sub])
         per-page-values [5 10 25 50 100]]
@@ -55,11 +58,11 @@
          {:style {:display "inline-block"}}
          [:span "Page Size: "]
          [:select
-          {:value     (or per-page dt/default-per-page)
+          {:value     (or per-page d/default-per-page)
            :on-change #(re-frame/dispatch
                          [::dt/set-per-page-value
                           db-id @pagination-state
-                          (js/parseInt (-> % .-target .-value))])}
+                          target-value])}
           (doall
             (for [per-page-option (->> per-page-values
                                        (cons per-page)
