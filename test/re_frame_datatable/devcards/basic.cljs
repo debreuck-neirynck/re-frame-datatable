@@ -1,4 +1,4 @@
-(ns re-frame-datatable.devcards.table
+(ns re-frame-datatable.devcards.basic
   (:require [reagent.core]
             [devcards.core :as dc :refer [defcard]]
             [re-frame.core :as rf]
@@ -17,12 +17,13 @@
    [dt/datatable
     :empty-table
     [::empty-list]
-    [{::dt/column-key [:name]}]
-    {}])
-  {::dt/table-classes ["table"]})
+    [{::dt/column-key [:name]
+      ::dt/column-label "name"}]
+    {::dt/table-classes ["table"]}])
+  {})
 
 (defn- custom-empty-body []
-  [:i "Custom component for empty tables"])
+  [:i "This table has no elements"])
 
 (defcard custom-empty-table
   "Empty table with custom component"

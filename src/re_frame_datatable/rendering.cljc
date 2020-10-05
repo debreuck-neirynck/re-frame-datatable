@@ -1,8 +1,11 @@
 (ns re-frame-datatable.rendering
   "Rendering functions for the table"
   (:require [re-frame.core :as re-frame]
+            [re-frame-datatable.paths :as p]
             [re-frame-datatable.subs :as subs]
             [re-frame-datatable.sorting :as sorting]))
+
+(def enabled-key :re-frame-datatable.core/enabled?)
 
 (defn- css-class-str [classes]
   {:class (->> classes
@@ -36,7 +39,7 @@
        [extra-header-row-component])
 
      [:tr
-      (when (::enabled? selection)
+      (when (enabled-key selection)
         [:th {:style {:max-width "16em"}}
          [:input {:type      "checkbox"
                   :checked   (clojure.set/subset?
@@ -57,15 +60,16 @@
          ^{:key (str column-key)}
          [:th
           (merge
-           (when (::enabled? sorting)
+           (when (enabled-key sorting)
              {:style    {:cursor "pointer"}
-              :on-click #(re-frame/dispatch [::sorting/set-sort-key db-id column-key (::comp-fn sorting)])
+              :on-click #(re-frame/dispatch [::sorting/set-sort-key db-id column-key
+                                             (:re-frame-datatable.core/comp-fn sorting)])
               :class    "sorted-by"})
-           (when (= column-key (get-in state [::sort ::sort-key]))
+           (when (= column-key (get-in state [::p/sort ::p/sort-key]))
              (css-class-str ["sorted-by"
-                             (condp = (get-in state [::sort ::sort-comp])
-                               ::sort-asc "asc"
-                               ::sort-desc "desc"
+                             (condp = (get-in state [::p/sort ::p/sort-comp])
+                               ::sorting/sort-asc "asc"
+                               ::sorting/sort-desc "desc"
                                "")])))
           (cond
             (string? column-label) column-label
@@ -77,7 +81,7 @@
         {:keys [:re-frame-datatable.core/empty-tbody-component]} options]
     [:tr
      [:td {:col-span (+ (count columns-def)
-                        (if (::enabled? selection) 1 0))
+                        (if (enabled-key selection) 1 0))
            :style    {:text-align "center"}}
       (if empty-tbody-component
         [empty-tbody-component]
@@ -98,7 +102,7 @@
     ;; Add the attributes for drag/drop operations, if any
     (drag-drop-attrs drag-drop data-entry))
 
-   (when (::enabled? selection)
+   (when (enabled-key selection)
      [:td
       [:input {:type      "checkbox"
                :checked   (contains? (::selected-indexes selection) i)

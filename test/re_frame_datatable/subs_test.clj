@@ -31,10 +31,28 @@
                  d => some?)
 
            (fact "provides state"
-                 (reset! app-db (assoc-in {} (p/state-db-path id) ..state..)) => truthy
-                 (:state @d) => ..state..)
+                 (reset! app-db (assoc-in {} (p/state-db-path id) {:key :value})) => truthy
+                 (:state @d) => {:key :value})
 
            (fact "provides visible items as indexed vector"
                  (swap! app-db assoc ::items [..item-1.. ..item-2..])
                  (:visible-items @d) => [[0 ..item-1..]
-                                         [1 ..item-2..]]))))
+                                         [1 ..item-2..]])
+
+           (fact "sorts data by key"
+                 (swap! app-db (fn [db]
+                                 (-> db
+                                     (assoc ::items [{:value 2} {:value 1}])
+                                     (assoc-in (p/sort-key-db-path id) [:value]))))
+                 (:visible-items @d) => [[1 {:value 1}]
+                                         [0 {:value 2}]])
+
+           (fact "applies sort-fn if given"
+                 (swap! app-db (fn [db]
+                                 (-> db
+                                     (assoc ::items [{:value "first"} {:value "second"}])
+                                     (assoc-in (p/sort-key-db-path id) [:value])
+                                     (assoc-in (p/sort-comp-fn-db-path id) (fn [a b]
+                                                                             (compare (last a) (last b)))))))
+                 (:visible-items @d) => [[1 {:value "second"}]
+                                         [0 {:value "first"}]]))))

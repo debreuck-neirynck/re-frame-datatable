@@ -1,0 +1,17 @@
+table.re-frame-datatable > thead th.sorted-by:after {
+    display: inline-block;
+}
+
+table.re-frame-datatable > thead th.sorted-by.desc:after {
+    content: '0d7';
+}
+
+table.re-frame-datatable > thead th.asc:after {
+    content: '0d8';
+}
+
+table.re-frame-datatable > thead th:after {
+    display: none;
+    font-family: Icons;
+    margin-left: .5em;
+}

@@ -1,6 +1,7 @@
 (ns re-frame-datatable.subs
   (:require [re-frame.core :as re-frame]
-            [re-frame-datatable.paths :as p]))
+            [re-frame-datatable.paths :as p]
+            [re-frame-datatable.sorting :as s]))
 
 (re-frame/reg-sub
  ::state
@@ -15,11 +16,11 @@
 
  (fn data-provider [[items state] _]
    (let [sort-data (fn [coll]
-                     (let [{:keys [::sort-key ::sort-comp ::sort-fn]} (::sort state)]
+                     (let [{:keys [::p/sort-key ::p/sort-comp ::p/sort-fn]} (::p/sort state)]
                        (if sort-key
                          (cond->> coll
-                           true (sort-by #(get-in (second %) sort-key) sort-fn)
-                           (= ::sort-desc sort-comp) (reverse))
+                           true (sort-by #(get-in (second %) sort-key) (or sort-fn compare))
+                           (= ::s/sort-desc sort-comp) (reverse))
                          coll)))
 
          paginate-data (fn [coll]

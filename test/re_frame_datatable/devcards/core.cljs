@@ -6,7 +6,9 @@
             ;; separately for shadow-cljs to add shims.
             [devcards.core :refer [start-devcard-ui!]]
             ;; Import all namespaces with cards here to load them.
-            [re-frame-datatable.devcards.table]
+            [re-frame-datatable.devcards.basic]
+            [re-frame-datatable.devcards.custom]
+            [re-frame-datatable.devcards.sorting]
             [re-frame.core :as rf]))
 
 (defn ^:dev/after-load clear-cache []
