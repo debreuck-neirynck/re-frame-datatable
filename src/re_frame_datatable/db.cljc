@@ -1,5 +1,6 @@
 (ns re-frame-datatable.db
-  "Functions for manipulating the re-frame database")
+  "Functions for manipulating the re-frame database"
+  (:require [re-frame-datatable.defaults :as d]))
 
 (def root ::re-frame-datatable)
 
@@ -48,3 +49,11 @@
 
 (defn pagination [db id]
   (:pagination (state db id)))
+
+(defn per-page
+  "Gets the correct `per-page` value for pagination, by retrieving it from state
+   or options, or falling back to the default."
+  [db id]
+  (or (get (pagination db id) :per-page)
+      (get-in (options db id) [:re-frame-datatable.core/pagination :re-frame-datatable.core/per-page])
+      d/default-per-page))

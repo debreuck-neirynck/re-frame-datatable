@@ -78,6 +78,15 @@
                                                                            ::dt/per-page 5}}))) => map?
                    (count (:visible-items @d)) => 5)
 
+             (fact "applies per-page from state"
+                   (reset! app-db (-> {}
+                                      (assoc ::items (->> (range 100)
+                                                          (map (fn [v] {:item v}))))
+                                      (db/set-options id {::dt/pagination {::dt/enabled? true
+                                                                           ::dt/per-page 5}})
+                                      (db/update-state id assoc-in [:pagination :per-page] 10))) => map?
+                   (count (:visible-items @d)) => 10)
+
              (fact "returns current page"
                    (swap! app-db (fn [db]
                                    (-> db

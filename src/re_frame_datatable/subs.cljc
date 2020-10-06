@@ -37,7 +37,9 @@
                          (let [{:keys [:re-frame-datatable.core/per-page
                                        :re-frame-datatable.core/enabled?]
                                 :or {per-page d/default-per-page}} (:re-frame-datatable.core/pagination options)
-                               {:keys [cur-page] :or {cur-page 0}} (:pagination state)]
+                               {:keys [cur-page] :or {cur-page 0}} (:pagination state)
+                               per-page (or (get-in state [:pagination :per-page])
+                                            per-page)]
                            (if enabled?
                              (->> coll
                                   (drop (* (or cur-page 0) (or per-page 0)))
