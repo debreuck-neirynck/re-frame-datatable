@@ -21,6 +21,7 @@ clj:test:
 clj:deploy:
   stage: publish
   script:
+    - gpg --import $GITLAB_GPG_KEY
     - lein deploy dn-clojars
   dependencies:
     - clj:test
