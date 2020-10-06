@@ -57,3 +57,16 @@
   (or (get (pagination db id) :per-page)
       (get-in (options db id) [:re-frame-datatable.core/pagination :re-frame-datatable.core/per-page])
       d/default-per-page))
+
+(defn set-selection
+  "Sets selected indices in db"
+  [db id idxes]
+  (update-state db id assoc-in [:selection :selected-indexes] (set idxes)))
+
+(defn update-selection [db id f]
+  (update-state db id update-in [:selection :selected-indexes] f))
+
+(defn selection
+  "Retrieves selected indices"
+  [db id]
+  (get-in (state db id) [:selection :selected-indexes]))

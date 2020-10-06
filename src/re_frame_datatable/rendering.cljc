@@ -1,7 +1,6 @@
 (ns re-frame-datatable.rendering
   "Rendering functions for the table"
   (:require [re-frame.core :as re-frame]
-            [re-frame-datatable.paths :as p]
             [re-frame-datatable.events :as e]
             [re-frame-datatable.subs :as subs]
             [re-frame-datatable.sorting :as sorting]))
@@ -33,8 +32,9 @@
      :clj (get-in x [:target :checked])))
 
 (defn- header [visible-items state db-id columns-def options]
-  (let [{:keys [:selection]} state
-        {:keys [:re-frame-datatable.core/extra-header-row-component]} options]
+  (let [{:keys [:re-frame-datatable.core/selection
+                :re-frame-datatable.core/extra-header-row-component]} options
+        sel (get-in state [:selection :selected-indexes])]
     [:thead
      (when extra-header-row-component
        [extra-header-row-component])
@@ -45,14 +45,14 @@
          [:input {:type      "checkbox"
                   :checked   (clojure.set/subset?
                               (->> visible-items (map first) (set))
-                              (:selected-indexes selection))
+                              sel)
                   :on-change #(when-not (zero? (count visible-items))
-                                (re-frame/dispatch [::change-table-selection
+                                (re-frame/dispatch [:re-frame-datatable.core/change-table-selection
                                                     db-id
                                                     (->> visible-items (map first) (set))
-                                                    checked?]))}]
+                                                    (checked? %)]))}]
          [:br]
-         [:small (str (count (:selected-indexes selection)) " selected")]])
+         [:small (str (count sel) " selected")]])
 
       (doall
        (for [{:keys [:re-frame-datatable.core/column-key
@@ -66,9 +66,9 @@
               :on-click #(re-frame/dispatch [::sorting/set-sort-key db-id column-key
                                              (:re-frame-datatable.core/comp-fn sorting)])
               :class    "sorted-by"})
-           (when (= column-key (get-in state [::p/sort ::p/sort-key]))
+           (when (= column-key (get-in state [:sorting :sort-key]))
              (css-class-str ["sorted-by"
-                             (condp = (get-in state [::p/sort ::p/sort-comp])
+                             (condp = (get-in state [:sorting :sort-comp])
                                ::sorting/sort-asc "asc"
                                ::sorting/sort-desc "desc"
                                "")])))
@@ -89,12 +89,12 @@
         "no items")]]))
 
 (defn- table-row [db-id columns-def state options [i data-entry]]
-  (let [{:keys [:selection]} state
-        {:keys [:re-frame-datatable.core/table-classes
+  (let [{:keys [:re-frame-datatable.core/table-classes
                 :re-frame-datatable.core/tr-class-fn
                 :re-frame-datatable.core/footer-component
                 :re-frame-datatable.core/empty-tbody-component
-                :re-frame-datatable.core/drag-drop]} options]
+                :re-frame-datatable.core/drag-drop
+                :re-frame-datatable.core/selection]} options]
   [:tr
    (merge
     {}
@@ -106,8 +106,9 @@
    (when (enabled-key selection)
      [:td
       [:input {:type      "checkbox"
-               :checked   (contains? (::selected-indexes selection) i)
-               :on-change #(re-frame/dispatch [::change-row-selection db-id i checked?])}]])
+               :checked   (contains? (get-in state [:selection :selected-indexes]) i)
+               :on-change #(re-frame/dispatch [:re-frame-datatable.core/change-row-selection
+                                               db-id i (checked? %)])}]])
 
    (doall
     (for [{:keys [:re-frame-datatable.core/column-key

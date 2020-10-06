@@ -25,7 +25,6 @@
  (fn data-provider [[items state options] _]
    (let [sort-data (fn [coll]
                      (let [{:keys [sort-key sort-comp sort-fn]} (:sorting state)]
-                       (println "Sorting using key" sort-key "and function" sort-fn)
                        (if sort-key
                          (cond->> coll
                            true (sort-by #(get-in (second %) sort-key) (or sort-fn compare))

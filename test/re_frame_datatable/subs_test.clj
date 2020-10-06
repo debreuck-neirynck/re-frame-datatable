@@ -23,15 +23,6 @@
                  (reset! app-db (db/set-state {} id state)) => map?
                  @s => state))))
 
-         ;; (fact "passes pagination info"
-         ;;       (let [s (rf/subscribe [::sut/state id])]
-         ;;         (::p/pagination @s) => {:key :pagination}))
-
-         ;; (fact "keeps existing pagination info"
-         ;;       (let [s (rf/subscribe [::sut/state id {:key :pagination}])]
-         ;;         (reset! app-db (assoc-in {} (p/db-path-for [::p/state ::p/pagination :existing] id) :value))
-         ;;         (::p/pagination @s) => (contains {:existing :value})))))
-
 (facts "about `data`"
        (let [id ::test-id
              sub-id ::test-sub]

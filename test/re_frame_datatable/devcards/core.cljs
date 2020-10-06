@@ -10,6 +10,7 @@
             [re-frame-datatable.devcards.custom]
             [re-frame-datatable.devcards.sorting]
             [re-frame-datatable.devcards.pagination]
+            [re-frame-datatable.devcards.selection]
             [re-frame.core :as rf]))
 
 (defn ^:dev/after-load clear-cache []
