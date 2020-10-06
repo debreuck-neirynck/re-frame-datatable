@@ -4,6 +4,9 @@ A UI component for [re-frame](https://github.com/Day8/re-frame).
 Uses existing subscription to data source in re-frame's `app-db` and declarative definition of how to render it as a table.
 Supports sorting, pagination and some basic CSS manipulations for generated table.
 
+This is a reworking of the [original](https://kishanov.github.io/re-frame-datatable), but we made the code
+more modular, added unit tests and used cljc instead of cljs, which allows to include it in clj unit tests.
+
 ## Quick links
 
 * [Documentation Website](https://kishanov.github.io/re-frame-datatable/) - re-frame app that shows how to use differt DataTable options
@@ -14,7 +17,7 @@ Supports sorting, pagination and some basic CSS manipulations for generated tabl
 
 Leiningen
 
-[![Leiningen version](https://clojars.org/re-frame-datatable/latest-version.svg)](http://clojars.org/re-frame-datatable)
+[![Leiningen version](https://clojars.org/dn/re-frame-datatable/latest-version.svg)](http://clojars.org/dn/re-frame-datatable)
 
 In your application add the following dependency to the file that defines views in your re-frame application:
 
