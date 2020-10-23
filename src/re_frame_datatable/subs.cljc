@@ -15,6 +15,23 @@
  (fn [db [_ db-id]]
    (db/options db db-id)))
 
+(defn- apply-case-sensitivity
+  "If case-insensitivity param is set to true lowercase passed string"
+  [s case-insensitive]
+  (if case-insensitive
+    (clojure.string/lower-case s)
+    s))
+
+(defn- filter-row
+  "Filter row data by checking if some value in a collection matches passed string
+
+  Matching is adjusted using case sensitivity
+  "
+  [string coll case-insensitive]
+  (some #(re-find (re-pattern (apply-case-sensitivity string case-insensitive))
+           (apply-case-sensitivity (str %) case-insensitive))
+    (vals (second coll))))
+
 (re-frame/reg-sub
  ::data
  (fn data-gatherer [[_ db-id data-sub] _]
@@ -23,7 +40,13 @@
     (re-frame/subscribe [::options db-id])])
 
  (fn data-provider [[items state options] _]
-   (let [sort-data (fn [coll]
+   (let [filter-data (fn [coll]
+                       (let [{:keys [:re-frame-datatable.core/case-insensitive-filtering]} (:re-frame-datatable.core/filtering options)
+                             {:keys [search-phrase]} (:filtering state)]
+                         (if search-phrase
+                           (filter #(filter-row search-phrase % case-insensitive-filtering) coll)
+                           coll)))
+         sort-data (fn [coll]
                      (let [{:keys [sort-key sort-comp sort-fn]} (:sorting state)]
                        (if sort-key
                          (cond->> coll
@@ -47,6 +70,7 @@
 
      {:visible-items (->> items
                           (map-indexed vector)
+                          (filter-data)
                           (sort-data)
                           (paginate-data))
       :state         state})))

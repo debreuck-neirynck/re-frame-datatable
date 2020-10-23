@@ -2,6 +2,7 @@
   (:require #?(:cljs [cljs.spec.alpha :as s]
                :clj [clojure.spec.alpha :as s])
             [re-frame-datatable.events :as e]
+            [re-frame-datatable.filtering]
             [re-frame-datatable.subs :as subs]
             [re-frame-datatable.sorting :as sorting]
             [re-frame-datatable.pagination :as p]
