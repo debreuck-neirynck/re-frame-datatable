@@ -4,6 +4,8 @@ A [re-frame](https://github.com/Day8/re-frame) application designed to ... well,
 
 ## Development Mode
 
+Lein figwheel requires Java SE8. It uses XMLBinding that is deprecated in Java SE9 and removed in Java SE11.
+
 ### Run application:
 
 ```

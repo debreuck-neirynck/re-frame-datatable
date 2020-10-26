@@ -144,3 +144,15 @@
                  :checked   (= per-page per-page-option)}]
                [:label per-page-option]]))]]))))
 
+(defn basic-filtering-controls [db-id data-sub]
+  (let [filtering-state (re-frame/subscribe [::re-frame-datatable.core/filtering-state db-id data-sub])]
+    (fn []
+      (let [{:keys [::re-frame-datatable.core/cur-input-filter-val]} @filtering-state]
+        [:div.re-frame-datatable.filtering {}
+         [:input {:type      "text"
+                  :value     (or cur-input-filter-val "")
+                  :on-change #(re-frame/dispatch [::re-frame-datatable.core/set-input-filter-val db-id (-> % .-target .-value)])}]
+         [:span.filter {:style {:cursor "pointer"}
+                       :on-click #(re-frame/dispatch [::re-frame-datatable.core/filter-table db-id])}
+          [:img {:src "images/icon_search.png"
+                 :style {:width "20px" :margin-left "10px"}}]]]))))

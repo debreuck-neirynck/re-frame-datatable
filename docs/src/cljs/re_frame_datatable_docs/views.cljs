@@ -15,6 +15,7 @@
             [re-frame-datatable-docs.sections.usage :as usage-sections]
             [re-frame-datatable-docs.sections.styling :as styling-sections]
             [re-frame-datatable-docs.sections.additional-structure :as structure-sections]
+            [re-frame-datatable-docs.sections.filtering :as filtering-sections]
             [re-frame-datatable-docs.sections.sorting :as sorting-sections]
             [re-frame-datatable-docs.sections.pagination :as pagination-sections]
             [re-frame-datatable-docs.sections.cell-rendering :as cell-rendering-sections]
@@ -94,6 +95,11 @@
                          :sections [["enabling-pagination" "Enabling Pagination" pagination-sections/enabling-pagination]
                                     ["per-page-selector" "Setting Page Size" pagination-sections/per-page-selector]
                                     ["custom-pagination-controls" "Custom Pagination Controls" pagination-sections/custom-pagination-controls]]}
+
+                        {:group    "Filtering"
+                         :sections [["enabling-filtering" "Enabling Filtering" filtering-sections/enabling-filtering]
+                                    ["case-insensitive-filtering" "Case-insensitive Filtering" filtering-sections/case-insensitive-filtering]
+                                    ["custom-filtering-controls" "Custom Filtering Controls" filtering-sections/custom-filtering-controls]]}
 
                         {:group    "Custom Cell Rendering"
                          :sections [["custom-cell-rendering-formatter" "Custom Formatters" cell-rendering-sections/cell-rendering]

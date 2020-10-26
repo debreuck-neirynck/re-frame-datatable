@@ -78,7 +78,7 @@
                {:value per-page-option}
                per-page-option]))]]))))
 
-(defn table-filtering [db-id data-sub]
+(defn default-filtering-controls [db-id data-sub]
   (let [filtering-state (re-frame/subscribe [::dt/filtering-state db-id data-sub])]
     (fn []
       (let [{:keys [::dt/cur-input-filter-val]} @filtering-state]

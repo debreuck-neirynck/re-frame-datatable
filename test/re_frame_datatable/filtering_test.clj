@@ -2,7 +2,8 @@
   (:require [midje.sweet :refer :all]
             [re-frame-datatable
              [core :as dt]
-             [db :as db]]
+             [db :as db]
+             [filtering :as filtering]]
             [re-frame
              [core :as rf]
              [db :refer [app-db]]]))
@@ -23,13 +24,10 @@
 
     (fact "returns filtering info"
       @s => map?
-      (keys @s) => (just [::dt/cur-input-filter-val ::dt/case-insensitive-filtering] :in-any-order))
+      (keys @s) => (just [::dt/cur-input-filter-val] :in-any-order))
 
     (fact "default current input filter value"
       (::dt/cur-input-filter-val @s) => string?)
-
-    (fact "default case-insensitive filtering"
-      (::dt/case-insensitive-filtering @s) => boolean?)
 
     (fact "takes current input filter value from state if provided"
       (reset! app-db (-> {::test-items (->> (range 100)

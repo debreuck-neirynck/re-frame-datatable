@@ -1,6 +1,11 @@
 # Change Log
 All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
 
+## [0.7.2] - 2020-10-23
+### Added
+- Filtering table based on input
+- Set case-sensitive searching as a default table row searching mechanism
+
 ## [0.6.1] - 2018-07-06
 ### Added
 - Added support for dragging & dropping table rows

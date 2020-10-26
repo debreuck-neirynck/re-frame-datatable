@@ -63,7 +63,7 @@ Here is a sample [Reagent](https://github.com/reagent-project/reagent) component
 * `columns-def` - a vector of maps, that defines how each column of datatable should look like
 * `options` - optional map of additional options
 
-For the complete documenation and live examples visit [Documentation website](https://kishanov.github.io/re-frame-datatable/).
+For the complete documentation and live examples visit [Documentation website](https://kishanov.github.io/re-frame-datatable/).
 
 ## How it works
 

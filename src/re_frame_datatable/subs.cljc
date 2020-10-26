@@ -3,7 +3,8 @@
             [re-frame-datatable.paths :as p]
             [re-frame-datatable.sorting :as s]
             [re-frame-datatable.defaults :as d]
-            [re-frame-datatable.db :as db]))
+            [re-frame-datatable.db :as db]
+            [re-frame-datatable.utils :as u]))
 
 (re-frame/reg-sub
  ::state
@@ -15,22 +16,14 @@
  (fn [db [_ db-id]]
    (db/options db db-id)))
 
-(defn- apply-case-sensitivity
-  "If case-insensitivity param is set to true lowercase passed string"
-  [s case-insensitive]
-  (if case-insensitive
-    (clojure.string/lower-case s)
-    s))
-
 (defn- filter-row
-  "Filter row data by checking if some value in a collection matches passed string
+  "Using search phrase filters row-map `{:name John, :city Brussels}`
+   by passing map values to a filter function.
 
-  Matching is adjusted using case sensitivity
-  "
-  [string coll case-insensitive]
-  (some #(re-find (re-pattern (apply-case-sensitivity string case-insensitive))
-           (apply-case-sensitivity (str %) case-insensitive))
-    (vals (second coll))))
+   Filter function should accept a search-phrase and return a function that takes in a string to compare."
+  [search-phrase row-map filter-fn]
+  (some (filter-fn search-phrase)
+    (vals row-map)))
 
 (re-frame/reg-sub
  ::data
@@ -41,10 +34,12 @@
 
  (fn data-provider [[items state options] _]
    (let [filter-data (fn [coll]
-                       (let [{:keys [:re-frame-datatable.core/case-insensitive-filtering]} (:re-frame-datatable.core/filtering options)
+                       (let [{:keys [:re-frame-datatable.core/enabled?
+                                     :re-frame-datatable.core/filtering-fn]}
+                             (:re-frame-datatable.core/filtering options)
                              {:keys [search-phrase]} (:filtering state)]
-                         (if search-phrase
-                           (filter #(filter-row search-phrase % case-insensitive-filtering) coll)
+                         (if (and enabled? search-phrase)
+                           (filter #(filter-row search-phrase (second %) (or filtering-fn u/case-sensitive-filtering-fn)) coll)
                            coll)))
          sort-data (fn [coll]
                      (let [{:keys [sort-key sort-comp sort-fn]} (:sorting state)]

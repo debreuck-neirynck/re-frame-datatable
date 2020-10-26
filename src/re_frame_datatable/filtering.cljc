@@ -14,10 +14,8 @@
      (re-frame/subscribe [::subs/state db-id])
      (re-frame/subscribe [::subs/options db-id])])
   (fn [[items state options] _]
-    (let [{:keys [:re-frame-datatable.core/filtering]} options
-          fs (:filtering state)]
-      {:re-frame-datatable.core/cur-input-filter-val (get fs :cur-input-filter-val "")
-       :re-frame-datatable.core/case-insensitive-filtering (get fs :case-insensitive-filtering false)})))
+    (let [fs (:filtering state)]
+      {:re-frame-datatable.core/cur-input-filter-val (get fs :cur-input-filter-val "")})))
 
 (re-frame/reg-event-db
   :re-frame-datatable.core/set-input-filter-val

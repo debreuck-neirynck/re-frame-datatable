@@ -4,6 +4,7 @@
             [devcards.core :as dc :refer [defcard]]
             [re-frame.core :as rf]
             [re-frame-datatable.core :as dt]
+            [re-frame-datatable.utils :as u]
             [re-frame-datatable.views :as v]))
 
 (rf/clear-subscription-cache!)
@@ -31,11 +32,12 @@
         ::dt/column-label "Value"}]
       {::dt/table-classes ["table"]
        ::dt/pagination {::dt/enabled? true
-                        ::dt/per-page 10}}]
+                        ::dt/per-page 10}
+       ::dt/filtering {::dt/enabled? true}}]
      [v/default-pagination-controls
       :table-filtering-case-sensitive
       [::test-data]]
-     [v/table-filtering
+     [v/default-filtering-controls
       :table-filtering-case-sensitive
       [::test-data]]]))
 
@@ -53,10 +55,11 @@
       {::dt/table-classes ["table"]
        ::dt/pagination {::dt/enabled? true
                         ::dt/per-page 10}
-       ::dt/filtering {::dt/case-insensitive-filtering true}}]
+       ::dt/filtering {::dt/enabled? true
+                       ::dt/filtering-fn u/case-insensitive-filtering-fn}}]
      [v/default-pagination-controls
       :table-filtering-case-insensitive
       [::test-data]]
-     [v/table-filtering
+     [v/default-filtering-controls
       :table-filtering-case-insensitive
       [::test-data]]]))
