@@ -70,3 +70,13 @@
   "Retrieves selected indices"
   [db id]
   (get-in (state db id) [:selection :selected-indexes]))
+
+(defn set-filtering
+  "Sets current filtering configuration in state"
+  [db id m]
+  (update-state db id assoc :filtering m))
+
+(defn filtering
+  "Retrieves filtering configuration"
+  [db id]
+  (:filtering (state db id)))

@@ -8,6 +8,7 @@
             ;; Import all namespaces with cards here to load them.
             [re-frame-datatable.devcards.basic]
             [re-frame-datatable.devcards.custom]
+            [re-frame-datatable.devcards.filtering]
             [re-frame-datatable.devcards.sorting]
             [re-frame-datatable.devcards.pagination]
             [re-frame-datatable.devcards.selection]

@@ -3,7 +3,8 @@
              [core :as dt]
              [subs :as sut]
              [paths :as p]
-             [db :as db]]
+             [db :as db]
+             [utils :as u]]
             [midje.sweet :refer :all]
             [re-frame
              [core :as rf]
@@ -87,4 +88,21 @@
                                                                             ::dt/per-page 5}})
                                        (db/set-state id {:pagination {:cur-page 1}})))) => map?
                    (-> (:visible-items @d)
-                       (first)) => [5 {:item 5}])))))
+                       (first)) => [5 {:item 5}]))
+
+           (fact "filters data case sensitive"
+             (reset! app-db (-> {}
+                              (assoc ::items [{:name "Item 1"} {:name "item 2"}])
+                              (db/set-options id {::dt/filtering {::dt/enabled? true}})
+                              (db/set-filtering id {:search-phrase "item"}))) => map?
+             (count (:visible-items @d)) => 1
+             (:visible-items @d) => [[1 {:name "item 2"}]])
+
+           (fact "filters data case insensitive"
+             (reset! app-db (-> {}
+                              (assoc ::items [{:name "Item 1"} {:name "item 2"}])
+                              (db/set-options id {::dt/filtering {::dt/enabled? true
+                                                                  ::dt/filtering-fn u/case-insensitive-filtering-fn}})
+                              (db/set-filtering id {:search-phrase "item"}))) => map?
+             (count (:visible-items @d)) => 2
+             (:visible-items @d) => [[0 {:name "Item 1"}] [1 {:name "item 2"}]]))))

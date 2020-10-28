@@ -7,6 +7,10 @@
   #?(:cljs (js/parseInt (-> e .-target .-value))
      :clj (Integer/parseInt (get-in e [:target :value]))))
 
+(defn- target-string-value [e]
+  #?(:cljs (-> e .-target .-value)
+     :clj (get-in e [:target :value])))
+
 (defn default-pagination-controls [db-id data-sub]
   (let [pagination-state (re-frame/subscribe [::dt/pagination-state db-id data-sub])]
     (fn [_ _]
@@ -73,3 +77,15 @@
               [:option
                {:value per-page-option}
                per-page-option]))]]))))
+
+(defn default-filtering-controls [db-id data-sub]
+  (let [filtering-state (re-frame/subscribe [::dt/filtering-state db-id data-sub])]
+    (fn []
+      (let [{:keys [::dt/cur-input-filter-val]} @filtering-state]
+        [:div.re-frame-datatable.filtering {}
+         [:div.filter {:on-click #(re-frame/dispatch [::dt/filter-table db-id])}
+          ;;; TODO more pleasant styling
+          (str "Search: " cur-input-filter-val)]
+         [:input {:type      "text"
+                  :value     (or cur-input-filter-val "")
+                  :on-change #(re-frame/dispatch [::dt/set-input-filter-val db-id (target-string-value %)])}]]))))

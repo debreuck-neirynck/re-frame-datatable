@@ -2,6 +2,7 @@
   (:require #?(:cljs [cljs.spec.alpha :as s]
                :clj [clojure.spec.alpha :as s])
             [re-frame-datatable.events :as e]
+            [re-frame-datatable.filtering]
             [re-frame-datatable.subs :as subs]
             [re-frame-datatable.sorting :as sorting]
             [re-frame-datatable.pagination :as p]
@@ -45,6 +46,10 @@
   (s/keys :req [::enabled?]
           :opt [::per-page ::cur-page ::total-pages]))
 
+(s/def ::filtering-fn fn?)
+(s/def ::filtering
+  (s/keys :opt [::filtering-fn]))
+
 (s/def ::selected-indexes (s/coll-of nat-int? :kind set))
 (s/def ::selection
   (s/keys :req [::enabled?]
@@ -64,13 +69,14 @@
 
 (s/def ::options
   (s/nilable
-    (s/keys :opt [::pagination
-                  ::header-enabled?
-                  ::table-classes
-                  ::selection
+    (s/keys :opt [::drag-drop
                   ::extra-header-row-component
+                  ::filtering
                   ::footer-component
-                  ::drag-drop])))
+                  ::header-enabled?
+                  ::pagination
+                  ::table-classes
+                  ::selection])))
 
 
 (def print-error

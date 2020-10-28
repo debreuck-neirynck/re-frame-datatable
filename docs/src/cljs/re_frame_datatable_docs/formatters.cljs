@@ -54,7 +54,10 @@
             (cond
               (fn? x)
               (let [fname (last (re-find #"^function re_frame_datatable_docs\$(formatters|table_views)\$(.*?)\(" (str x)))]
-                (symbol (clojure.string/replace fname #"_" "-")))
+                (if fname
+                  (symbol (clojure.string/replace fname #"_" "-"))
+                  (cond
+                    (re-find #"case_insensitive_filtering_fn" (str x)) (symbol "dt-utils/case-insensitive-filtering-fn"))))
 
               (and (keyword? x)
                    (re-seq #"^:re-frame-datatable.core" (str x)))
